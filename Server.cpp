@@ -1,112 +1,107 @@
-#pragma comment(lib,"wsock32.lib")
-#include <stdio.h>
-#include <stdlib.h>
-#include <WinSock2.h>
+#pragma comment(lib,"wsock32.lib") 
+ #include <stdio.h> 
+ #include <stdlib.h> 
+ #include <string.h> 
+ #include <WinSock2.h> 
+  
+ #define BUFSIZE 512 
+  
 
-#define SERVERPORT 1234
-#define BUFSIZE 512
 
-int main()
-{
+ int main(int argc, char* argv[]) 
+ { 
+		
+	 if(argc==1)
+	 {
+		printf("에코서버 사용법: 파일이름.exe 포트번호 에코옵션\n");
+		exit(1);
+	 }
+			 
+ 
+ 	WSADATA wsadata;
 	int val;
-	WSADATA wd;
-
-	if(WSAStartup(MAKEWORD(2,0),&wd) != 0)
-	{
-		printf("WinSock Error!!\n");
-		return 0;
-	}
-	printf("윈속 초기화 성공!!\n");
-
-	SOCKET ser_sock=socket(AF_INET,SOCK_STREAM,0);
+	char buf[BUFSIZE];
 	
-	if(ser_sock == INVALID_SOCKET)
-	{
-		printf("SocKet Error!!\n");
-		return 0;
-	}
+  
+ 	if(WSAStartup(MAKEWORD(2,0),&wsadata) != 0)
+		printf("윈속 초기화 에러!\n");
 
+ 	printf("윈속 초기화 성공!!\n"); 
+
+	
+	SOCKET server_sock=socket(AF_INET,SOCK_STREAM,0);
+	
+
+	if(server_sock == -1)
+	{
+		printf("서버 소켓 생성 에러");
+		exit(1);
+
+	}
+	
 	printf("서버 소켓 생성!!\n");
 
-	SOCKADDR_IN ser_addr;
-
-	ZeroMemory(&ser_addr,sizeof(ser_addr));
-
-	ser_addr.sin_family=AF_INET;
-	ser_addr.sin_addr.s_addr=htonl(INADDR_ANY);
-	ser_addr.sin_port=htons(SERVERPORT);
-
+	SOCKADDR_IN serverAddr;
 	
-	if(bind(ser_sock,(SOCKADDR *)&ser_addr,sizeof(ser_addr)) == SOCKET_ERROR)
+	ZeroMemory(&serverAddr,sizeof(serverAddr));
+	serverAddr.sin_family=AF_INET;
+	serverAddr.sin_addr.s_addr=htonl(INADDR_ANY);
+	serverAddr.sin_port=htons(atoi(argv[1]));
+
+	if(bind(server_sock,(SOCKADDR *) &serverAddr,sizeof(serverAddr)) == -1)
 	{
-		printf("바인딩 실패!!\n");
-		return 0;
+		printf("binding 에러!!\n");
+		exit(1);
 	}
 
-	printf("서버 소켓 주소할당 성공!\n");
-
-	if(listen(ser_sock,SOMAXCONN) == SOCKET_ERROR)
+	if(listen(server_sock,5)==-1)
 	{
-		printf("연결 요청한 클라이언트가 없습니다.\n");
-		return 0;
+		printf("listening 에러!!\n");
+		exit(1);
 	}
 
-		SOCKET cli_sock;
-		SOCKADDR_IN cli_addr;
-		int addrlen;
-		char buf[BUFSIZE];
-
-
+	SOCKET client_sock;
+	SOCKADDR_IN clientAddr;
+	int client_addr_len;
 	while(1)
 	{
-		printf("연결 요청 대기 상태!!\n");
-		addrlen=sizeof(cli_addr);
-
-		cli_sock = accept(ser_sock,(SOCKADDR *)&cli_addr,&addrlen);
-
-		if(cli_sock == INVALID_SOCKET)
+		printf("대기하고 있는 클라이언트가 없습니다.\n");
+		client_addr_len=sizeof(clientAddr);
+		if(accept(server_sock,(SOCKADDR *) &clientAddr,&client_addr_len) == -1)
 		{
-			printf("연결 요청이 실패하였습니다.!!\n");
-			break;
+			printf("accepting 에러!\n");
+			exit(1);
 		}
 
-		printf("연결 요청 수락!!\n");
+		printf("클라이언트와 연결이 되었습니다.\n");
 
 		while(1)
 		{
-			val = recv(cli_sock,buf,BUFSIZE,0);
-
-			if(strcmp(buf, "quit") == 0)
+			val=recv(client_sock,buf,BUFSIZE,0);
+			
+			if(val ==  SOCKET_ERROR )
 			{
-				printf("\n클라이언트의 요청으로 접속을 종료합니다.");
-				getchar();
+				printf("recving 에러!\n");
 				exit(1);
 			}
-
-			else if(val == 0)
-			{
-				printf("\n입력한 내용이 없습니다. 프로그램을 종료합니다.");
-				getchar();
-				exit(1);
-			}
-
+			
 			buf[val] = '\0';
-			printf("메세지: %s\n",buf);
+			printf("클라이언트 ==> 서버: %s\n",buf);
 
-			send(cli_sock,buf,sizeof(buf),0);
+			if(strcmp(argv[2],"-echo") == 0)
+				send(client_sock,buf,sizeof(buf),0);
 
 		}
+		closesocket(client_sock);
 
-		closesocket(cli_sock);
-		printf("클라이언트와 연결 종료!!\n");
-	
 	}
 
-		closesocket(ser_sock);
-		WSACleanup();
-
-		printf("윈속 라이브러리 해제!!\n");
-		return 0;
-
-
-}
+	closesocket(server_sock);		
+ 
+ 		WSACleanup(); 
+  
+ 		printf("윈속 라이브러리 해제!!\n"); 
+ 		return 0; 
+  
+  
+ } 
