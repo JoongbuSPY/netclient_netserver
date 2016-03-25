@@ -1,97 +1,114 @@
-#pragma comment(lib,"wsock32.lib")// TCP/IP에서 사용되는 함수는 일반적인 C 라이브러리가 아니기 때문에 wsock32.lib를 반드시 포함해 주어야 하는데 #pragma comment 문은 특정 라이브러리 파일을 포함시킬 때 사용한다.
-#include <winsock2.h>// TCP/IP에서 사용되는 모든 함수들은 winsock2.h에 선언되어 있습니다.
-#include <stdio.h>
-#include <stdlib.h>
+#pragma comment(lib,"wsock32.lib")  
+#include <stdio.h>  
+#include <stdlib.h>  
+#include <string.h>  
+#include <WinSock2.h>  
 
-
-#define SERVERIP   "127.0.0.1"
-#define SERVERPORT 1234
 #define BUFSIZE    512
 
-int main(void)
+int main(int argc, char* argv[]) 
 {
+	
 	int val;
+	char * ServerIp = argv[1];
+	int time=1000;
+	unsigned short ServerPort = atoi(argv[2]);
 
-	WSADATA wd;
 
-	if(WSAStartup(MAKEWORD(2,0),&wd) != 0)
+	if(argc != 3)
+	{
+		printf("파일명.exe 서버IP 서버PORT 을 입력하세요\n");
+		exit(1);
+	}
+
+	
+	WSADATA wsaData;
+
+	if(WSAStartup(MAKEWORD(2,0),&wsaData) != 0)
 	{
 		printf("윈속 초기화 에러!!\n");
-		return 0;
+		exit(1);
 	}
 
-	printf("윈속 초기화 성공!!\n");
+	printf("윈속 초기화 성공\n");
 
-	SOCKET csock=socket(AF_INET,SOCK_STREAM,0);
+	SOCKET client_sock;
+	
+	client_sock=socket(AF_INET,SOCK_STREAM,0);
+	
 
-	if(csock == INVALID_SOCKET)
+	if(client_sock == -1)
 	{
-		printf("클라이언트 소켓 생성 에러!!\n");
-		return 0;
+		printf("클라이언트 소켓 에러\n");
+		exit(1);
 	}
 
-	printf("클라이언트 소켓 생성!!\n");
+	SOCKADDR_IN server_addr; 
+ 
+ 	ZeroMemory(&server_addr,sizeof(server_addr)); 
+ 	server_addr.sin_family = AF_INET; 
+ 	server_addr.sin_addr.s_addr = inet_addr(ServerIp); 
+ 	server_addr.sin_port = htons(ServerPort); 
 
-	SOCKADDR_IN saddr;
 
-	ZeroMemory(&saddr,sizeof(saddr));
-	saddr.sin_family = AF_INET;
-	saddr.sin_addr.s_addr = inet_addr(SERVERIP);
-	saddr.sin_port = htons(SERVERPORT);
-
-	if(connect(csock, (SOCKADDR *)&saddr, sizeof(saddr)) == SOCKET_ERROR)
-	{
-		printf("서버 접속 에러!!\n");
-		return 0;
-	}
-
+ 
+ 	if(connect(client_sock,(SOCKADDR *)&server_addr, sizeof(server_addr)) == SOCKET_ERROR)
+ 	{ 
+ 		printf("서버 접속 에러!!\n"); 
+ 		exit(1);
+	} 
+	
 	char buf[BUFSIZE+1];
-	int blen;
+	int check_echo=10;
+	
+	recv(client_sock,buf,sizeof(buf),0);//에코옵션 확인
+
+	if(buf[0]==0)
+		check_echo=0;
+	else
+		check_echo=1;
 
 	while(1)
 	{
-
-		printf("메세지: ");
-		
-		if(fgets(buf,BUFSIZE+1,stdin)==NULL)
-			break;
-
-		blen = strlen(buf);
-		if(buf[blen-1] == '\n')
-			buf[blen-1] = '\0';
-
-		if(strlen(buf)==0)
-			break;
-
-
-		val=send(csock,buf,strlen(buf),0);
-
-		if(val == SOCKET_ERROR)
-		{
-			printf("서버에게 전달 할 수 없습니다.!!\n");
-			break;
-		}
-
-		if(strcmp(buf, "quit") == 0)
-		{
-			printf("접속을 종료합니다.!!\n");
-			break;
-		}
-		val=recv(csock,buf,sizeof(buf)-1,0);
-		
-		if(val == 0)
-			break;
-		printf("서버 => 클라이언트: %s \n",buf);
+		printf("전송할 메시지를 입력하시오 (종료시 quit입력): ");
 	
-	}
+		scanf_s("%s",&buf,BUFSIZE);
+	
+		if(strcmp(buf,"quit") == 0)
+		{
+			printf("프로그램을 종료합니다.\n");
+			getchar();
+			exit(1);
+		}
 
-	closesocket(csock);
+			val = strlen(buf); 
+			if(buf[val-1] == '\n') 
+ 				buf[val-1] = '\0'; 
+
+			if(send(client_sock,buf,strlen(buf),0) == SOCKET_ERROR)
+			{
+				printf("Send 에러!!\n");
+				exit(1);
+			}
+
+			//-echo 기능이 켜있을때.
+			
+
+			if(check_echo==0)
+			{
+				recv(client_sock,buf,sizeof(buf)-1,0);
+				printf("서버 ===> 클라이언트 %s \n",buf);
+			}
+	}
+			
+				
+			
+				
+	
+	closesocket(client_sock);
 
 	WSACleanup();
+
 	return 0;
-
-
-
-
-
 }
+
