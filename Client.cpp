@@ -3,17 +3,32 @@
 #include <stdlib.h>  
 #include <string.h>  
 #include <WinSock2.h>  
+#include <windows.h>
 
 #define BUFSIZE    512
+
+DWORD WINAPI t_work(void *data)
+{
+
+
+	SOCKET th_sock = (SOCKET)data;
+	int t_recv;
+	char th_buf[BUFSIZE];
+	
+	if(recv(th_sock,th_buf,sizeof(th_buf),0) > 0)
+		printf("서버 ===>: 클라이언트: %s",th_buf);
+		
+	
+	return 0;
+}
 
 int main(int argc, char* argv[]) 
 {
 	
-	int val;
+	int val,echo;
 	char * ServerIp = argv[1];
-	int time=1000;
 	unsigned short ServerPort = atoi(argv[2]);
-
+	int timeout=1000;
 
 	if(argc != 3)
 	{
@@ -59,21 +74,14 @@ int main(int argc, char* argv[])
 	} 
 	
 	char buf[BUFSIZE+1];
-	int check_echo=10;
-	
-	recv(client_sock,buf,sizeof(buf),0);//에코옵션 확인
-
-	if(buf[0]==0)
-		check_echo=0;
-	else
-		check_echo=1;
+	HANDLE th_thread;
 
 	while(1)
 	{
-		printf("전송할 메시지를 입력하시오 (종료시 quit입력): ");
-	
+		Sleep(2);
+		printf("\n\n전송할 메시지를 입력하시오 (종료시 quit입력): ");
 		scanf_s("%s",&buf,BUFSIZE);
-	
+
 		if(strcmp(buf,"quit") == 0)
 		{
 			printf("프로그램을 종료합니다.\n");
@@ -91,20 +99,11 @@ int main(int argc, char* argv[])
 				exit(1);
 			}
 
-			//-echo 기능이 켜있을때.
-			
+		th_thread = CreateThread(NULL,0,t_work,(void *)client_sock,0,NULL);	
 
-			if(check_echo==0)
-			{
-				recv(client_sock,buf,sizeof(buf)-1,0);
-				printf("서버 ===> 클라이언트 %s \n",buf);
-			}
+			
 	}
 			
-				
-			
-				
-	
 	closesocket(client_sock);
 
 	WSACleanup();
