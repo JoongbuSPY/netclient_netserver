@@ -16,7 +16,7 @@ DWORD WINAPI t_work(void *data)
 	char th_buf[BUFSIZE];
 	
 	if(recv(th_sock,th_buf,sizeof(th_buf),0) > 0)
-		printf("¼­¹ö ===>: Å¬¶óÀÌ¾ğÆ®: %s",th_buf);
+		printf("ì„œë²„ ===>: í´ë¼ì´ì–¸íŠ¸: %s",th_buf);
 		
 	
 	return 0;
@@ -24,28 +24,29 @@ DWORD WINAPI t_work(void *data)
 
 int main(int argc, char* argv[]) 
 {
+
+	
+ if(argc<=2 || argc>3)
+	 {
+		printf("ì—ì½” í´ë¼ì´ì–¸íŠ¸ ì‚¬ìš©ë²•: íŒŒì¼ì´ë¦„.exe ì„œë²„IP í¬íŠ¸ë²ˆí˜¸\n");
+		exit(1);
+	 }
 	
 	int val,echo;
 	char * ServerIp = argv[1];
 	unsigned short ServerPort = atoi(argv[2]);
 	int timeout=1000;
 
-	if(argc != 3)
-	{
-		printf("ÆÄÀÏ¸í.exe ¼­¹öIP ¼­¹öPORT À» ÀÔ·ÂÇÏ¼¼¿ä\n");
-		exit(1);
-	}
-
 	
 	WSADATA wsaData;
 
 	if(WSAStartup(MAKEWORD(2,0),&wsaData) != 0)
 	{
-		printf("À©¼Ó ÃÊ±âÈ­ ¿¡·¯!!\n");
+		printf("ìœˆì† ì´ˆê¸°í™” ì—ëŸ¬!!\n");
 		exit(1);
 	}
 
-	printf("À©¼Ó ÃÊ±âÈ­ ¼º°ø\n");
+	printf("ìœˆì† ì´ˆê¸°í™” ì„±ê³µ\n");
 
 	SOCKET client_sock;
 	
@@ -54,7 +55,7 @@ int main(int argc, char* argv[])
 
 	if(client_sock == -1)
 	{
-		printf("Å¬¶óÀÌ¾ğÆ® ¼ÒÄÏ ¿¡·¯\n");
+		printf("í´ë¼ì´ì–¸íŠ¸ ì†Œì¼“ ì—ëŸ¬\n");
 		exit(1);
 	}
 
@@ -69,7 +70,7 @@ int main(int argc, char* argv[])
  
  	if(connect(client_sock,(SOCKADDR *)&server_addr, sizeof(server_addr)) == SOCKET_ERROR)
  	{ 
- 		printf("¼­¹ö Á¢¼Ó ¿¡·¯!!\n"); 
+ 		printf("ì„œë²„ ì ‘ì† ì—ëŸ¬!!\n"); 
  		exit(1);
 	} 
 	
@@ -79,12 +80,12 @@ int main(int argc, char* argv[])
 	while(1)
 	{
 		Sleep(2);
-		printf("\n\nÀü¼ÛÇÒ ¸Ş½ÃÁö¸¦ ÀÔ·ÂÇÏ½Ã¿À (Á¾·á½Ã quitÀÔ·Â): ");
+		printf("\n\nì „ì†¡í•  ë©”ì‹œì§€ë¥¼ ì…ë ¥í•˜ì‹œì˜¤ (ì¢…ë£Œì‹œ quitì…ë ¥): ");
 		scanf_s("%s",&buf,BUFSIZE);
 
 		if(strcmp(buf,"quit") == 0)
 		{
-			printf("ÇÁ·Î±×·¥À» Á¾·áÇÕ´Ï´Ù.\n");
+			printf("í”„ë¡œê·¸ë¨ì„ ì¢…ë£Œí•©ë‹ˆë‹¤.\n");
 			getchar();
 			exit(1);
 		}
@@ -95,7 +96,7 @@ int main(int argc, char* argv[])
 
 			if(send(client_sock,buf,strlen(buf),0) == SOCKET_ERROR)
 			{
-				printf("Send ¿¡·¯!!\n");
+				printf("Send ì—ëŸ¬!!\n");
 				exit(1);
 			}
 
