@@ -22,19 +22,19 @@ DWORD WINAPI t_work(void *data)
 	{
 		if(t_recv == SOCKET_ERROR || t_recv == 0)
 		{
-			printf("\nÅ¬¶óÀÌ¾ğÆ®¿Í ¿¬°áÀÌ Á¾·áµÇ¾ú½À´Ï´Ù.\n");
+			printf("\ní´ë¼ì´ì–¸íŠ¸ì™€ ì—°ê²°ì´ ì¢…ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.\n");
 			break;
 		}
 
 		th_buf[t_recv] = '\0';
-		printf("Å¬¶óÀÌ¾ğÆ® ==> ¼­¹ö: %s\n",th_buf);
+		printf("í´ë¼ì´ì–¸íŠ¸ ==> ì„œë²„: %s\n",th_buf);
 
 		if(is_echo==1)
 			t_send = send(th_sock,th_buf,t_recv,0);
 		
 		if(t_send == SOCKET_ERROR)
 		{
-			printf("t_send ¿À·ù\n");
+			printf("t_send ì˜¤ë¥˜\n");
 			break;
 		}
 
@@ -49,9 +49,9 @@ DWORD WINAPI t_work(void *data)
  int main(int argc, char* argv[]) 
  { 
 
-	 if(argc<0 || argc>3)
+	 if(argc<2 || argc>3)
 	 {
-		printf("¿¡ÄÚ¼­¹ö »ç¿ë¹ı: ÆÄÀÏÀÌ¸§.exe Æ÷Æ®¹øÈ£ ¿¡ÄÚ¿É¼Ç\n");
+		printf("ì—ì½”ì„œë²„ ì‚¬ìš©ë²•: íŒŒì¼ì´ë¦„.exe í¬íŠ¸ë²ˆí˜¸ ì—ì½”ì˜µì…˜\n");
 		exit(1);
 	 }
 
@@ -68,12 +68,12 @@ DWORD WINAPI t_work(void *data)
   
  	if(WSAStartup(MAKEWORD(2,0),&wsadata) != 0)
 	{
-		printf("À©¼Ó ÃÊ±âÈ­ ¿¡·¯!\n");
+		printf("ìœˆì† ì´ˆê¸°í™” ì—ëŸ¬!\n");
 		exit(1);
 
 	}
 
- 	printf("À©¼Ó ÃÊ±âÈ­ ¼º°ø!!\n"); 
+ 	printf("ìœˆì† ì´ˆê¸°í™” ì„±ê³µ!!\n"); 
 
 	
 	SOCKET server_sock=socket(AF_INET,SOCK_STREAM,0);
@@ -81,12 +81,12 @@ DWORD WINAPI t_work(void *data)
 
 	if(server_sock == -1)
 	{
-		printf("¼­¹ö ¼ÒÄÏ »ı¼º ¿¡·¯");
+		printf("ì„œë²„ ì†Œì¼“ ìƒì„± ì—ëŸ¬");
 		exit(1);
 
 	}
 	
-	printf("¼­¹ö ¼ÒÄÏ »ı¼º!!\n");
+	printf("ì„œë²„ ì†Œì¼“ ìƒì„±!!\n");
 
 	SOCKADDR_IN serverAddr;
 	
@@ -98,19 +98,19 @@ DWORD WINAPI t_work(void *data)
 
 	if(bind(server_sock,(SOCKADDR *) &serverAddr,sizeof(serverAddr)) == -1)
 	{
-		printf("binding ¿¡·¯!!\n");
+		printf("binding ì—ëŸ¬!!\n");
 		exit(1);
 	}
 
-	printf("¹ÙÀÎµù ¼º°ø!\n");
+	printf("ë°”ì¸ë”© ì„±ê³µ!\n");
 
 	if(listen(server_sock,SOMAXCONN) == -1)
 	{
-		printf("listening ¿¡·¯!!\n");
+		printf("listening ì—ëŸ¬!!\n");
 		exit(1);
 	}
 
-	printf("listen ¼º°ø!!\n");
+	printf("listen ì„±ê³µ!!\n");
 
 	SOCKET client_sock;
 	SOCKADDR_IN clientAddr;
@@ -127,11 +127,11 @@ DWORD WINAPI t_work(void *data)
 
 		if(client_sock == -1)
 		{
-			printf("accepting ¿¡·¯!\n");
+			printf("accepting ì—ëŸ¬!\n");
 			exit(1);
 		}
 
-		printf("\nÅ¬¶óÀÌ¾ğÆ®¿Í ¿¬°áÀÌ µÇ¾ú½À´Ï´Ù.\n",count);
+		printf("\ní´ë¼ì´ì–¸íŠ¸ì™€ ì—°ê²°ì´ ë˜ì—ˆìŠµë‹ˆë‹¤.\n",count);
 		th_thread = CreateThread(NULL,0,t_work,(void *)client_sock,0,NULL);
 
 
@@ -141,7 +141,7 @@ DWORD WINAPI t_work(void *data)
  
  		WSACleanup(); 
   
- 		printf("À©¼Ó ¶óÀÌºê·¯¸® ÇØÁ¦!!\n"); 
+ 		printf("ìœˆì† ë¼ì´ë¸ŒëŸ¬ë¦¬ í•´ì œ!!\n"); 
  		return 0; 
   
  } 
