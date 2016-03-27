@@ -7,7 +7,6 @@
  #define BUFSIZE 512
 
 int is_echo=0;
-int count=1;
 
 DWORD WINAPI t_work(void *data)
 {
