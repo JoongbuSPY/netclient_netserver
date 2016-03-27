@@ -130,7 +130,7 @@ DWORD WINAPI t_work(void *data)
 			exit(1);
 		}
 
-		printf("\n클라이언트와 연결이 되었습니다.\n",count);
+		printf("\n클라이언트와 연결이 되었습니다.\n");
 		th_thread = CreateThread(NULL,0,t_work,(void *)client_sock,0,NULL);
 
 
